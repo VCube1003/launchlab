@@ -1,0 +1,113 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #faf9f6;
+}
+:root {
+  --text-color: #0d0d0d;
+  --main-menu-btn-padding: 20px 40px;
+  --main-menu-btn-font-size: 27px;
+  --main-menu-btn-radius: 50px;
+  --main-menu-btn-bg-color: #ff914d;
+  --level-selector-btn-padding: 10px 20px;
+  --level-selector-btn-font-size: 20px;
+  --level-selector-btn-radius: 0px;
+  --level-selector-btn-bg-color: #ff5757;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.main-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  justify-content: center;
+  padding: 40px;
+}
+
+.main-menu-btn {
+  padding: var(--main-menu-btn-padding);
+  font-size: var(--main-menu-btn-font-size);
+  border-radius: var(--main-menu-btn-radius);
+  background-color: var(--main-menu-btn-bg-color);
+
+  width: 50%;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  
+  border: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 0px rgba(0, 0, 0, 0.2);
+}
+
+.level-selector-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 50px;
+}
+
+.level-selector-buttons {
+    display: grid;
+
+    /* Create 4 columns that take up equal space (1 fraction each) */
+    grid-template-columns: repeat(4, 1fr); 
+    
+    /* Create 2 rows with a specific height (or use 'auto') */
+    grid-template-rows: repeat(2, 100px);
+    
+    /* The gaps between the buttons */
+    gap: 50px;
+    
+    /* Centering the whole grid on the screen */
+    width: 80%;
+    margin: 50px auto;
+}
+
+.level-selector-screen h1{
+    margin-bottom: 40px;  /* Adjust this number to increase/decrease the gap */
+    text-align: center;   /* Keeps your title centered */
+}
+
+.level-selector-btn {
+    padding: var(--level-selector-btn-padding);
+    font-size: var(--level-selector-btn-font-size);
+    border-radius: var(--level-selector-btn-radius);
+    background-color: var(--level-selector-btn-bg-color);
+
+    width: 100%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+  
+    border: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 0px rgba(0, 0, 0, 0.2);
+}
+
+/* Animation: Hover & Click */
+.btn-launch:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+  box-shadow: 0 6px 0px rgba(0, 0, 0, 0.2);
+}
+
+.btn-launch:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0px rgba(0, 0, 0, 0.2);
+}
