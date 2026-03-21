@@ -71,13 +71,24 @@ const levelConfigs = [{
 }
 ];
 
+function encode(){
+    let code = "";
+    for (i = 0; i < levelCompletions.length; i++){
+        code += levelCompletions[i] ? "1" : "0";
+    }
+    for (i = 0; i < bestTimes.length; i++){
+        code += "|" + (bestTimes[i] !== null ? String(bestTimes[i]) : "null");
+    }
+    return code;
+}
+
 function startGame() {
     menu.classList.add("hidden");
     levelsScreen.classList.remove("hidden"); 
 }
 
 function saveGame() {
-    alert("Save Game");
+    alert(encode());
 }
 
 function loadGame() {
@@ -209,13 +220,13 @@ function physicsSimulation() {
             simRunning = false;
 
             if (Math.hypot(pos[0] - goal[0], pos[1] - goal[1]) < 5) {
-                let finalTime = stopTimer();
+                let finalTime = (stopTimer() / 1000).toFixed(3);
 
-                alert(`Level ${currentLevel + 1} Complete! Time: ${(finalTime / 1000).toFixed(3)}s`);
+                alert(`Level ${currentLevel + 1} Complete! Time: ${finalTime}s`);
 
                 if (!levelCompletions[currentLevel] || elapsed < bestTimes[currentLevel]) {
                     levelCompletions[currentLevel] = true;
-                    bestTimes[currentLevel] = elapsed;
+                    bestTimes[currentLevel] = finalTime;
                 }
                 
                 backToLevels();
