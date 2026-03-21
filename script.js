@@ -329,6 +329,10 @@ angleInput.addEventListener("input", () => updateDisplayFromInput(angleInput, an
 velocityInput.addEventListener("input", () => updateDisplayFromInput(velocityInput, velocitySlider, velocityValue));
 heightInput.addEventListener("input", () => updateDisplayFromInput(heightInput, heightSlider, heightValue));
 
+angleInput.addEventListener("input", () => updateControlsInfo());
+velocityInput.addEventListener("input", () => updateControlsInfo());
+heightInput.addEventListener("input", () => updateControlsInfo());
+
 angleSlider.addEventListener("input", () => updateControlsInfo());
 velocitySlider.addEventListener("input", () => updateControlsInfo());
 heightSlider.addEventListener("input", () => updateControlsInfo());
