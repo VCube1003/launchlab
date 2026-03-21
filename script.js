@@ -2,10 +2,17 @@ const menu = document.getElementById("menu");
 const levelsScreen = document.getElementById("levels");
 const gameScreen = document.getElementById("gameScreen");
 
+const angleControl = document.getElementById("angleControl");
+const velocityControl = document.getElementById("velocityControl");
+const heightControl = document.getElementById("heightControl");
+
 levelsScreen.classList.add("hidden");
 gameScreen.classList.add("hidden");
 saveModal.classList.add("hidden");
 loadModal.classList.add("hidden");
+angleControl.classList.add("hidden");
+velocityControl.classList.add("hidden");
+heightControl.classList.add("hidden");
 
 let numLevels = 8;
 let levelCompletions = [false, false, false, false, false, false, false, false];
@@ -13,7 +20,6 @@ let bestTimes = [null, null, null, null, null, null, null, null];
 
 const levelConfigs = [{
     targetPosition: [50, 0],
-    initialHeight: 0,
     initialVelocity: 25,
     launchAngle: 0,
     adjustableParameter: "height",
@@ -21,7 +27,6 @@ const levelConfigs = [{
 }, {
     targetPosition: [30, 0],
     initialHeight: 0,
-    initialVelocity: 0,
     launchAngle: 30,
     adjustableParameter: "velocity",
     constraintRange: [0, 100]
@@ -29,12 +34,10 @@ const levelConfigs = [{
     targetPosition: [50, 0],
     initialHeight: 20,
     initialVelocity: 25,
-    launchAngle: 0,
     adjustableParameter: "angle",
     constraintRange: [0, 90]
 }, {
     targetPosition: [100, 0],
-    initialHeight: 0,
     initialVelocity: 50,
     launchAngle: 0,
     adjustableParameter: "height",
@@ -42,7 +45,6 @@ const levelConfigs = [{
 }, 
 {
     targetPosition: [100, 0],
-    initialHeight: 0,
     initialVelocity: 50,
     launchAngle: 0,
     adjustableParameter: "height",
@@ -50,7 +52,6 @@ const levelConfigs = [{
 }, 
 {
     targetPosition: [100, 0],
-    initialHeight: 0,
     initialVelocity: 50,
     launchAngle: 0,
     adjustableParameter: "height",
@@ -58,7 +59,6 @@ const levelConfigs = [{
 }, 
 {
     targetPosition: [100, 0],
-    initialHeight: 0,
     initialVelocity: 50,
     launchAngle: 0,
     adjustableParameter: "height",
@@ -66,7 +66,6 @@ const levelConfigs = [{
 }, 
 {
     targetPosition: [100, 0],
-    initialHeight: 0,
     initialVelocity: 50,
     launchAngle: 0,
     adjustableParameter: "height",
@@ -206,6 +205,19 @@ const angleInput = document.getElementById("angleInput");
 const velocityInput = document.getElementById("velocityInput");
 const heightInput = document.getElementById("heightInput");
 
+const infoTargetPosition = document.getElementById("infoTargetPosition");
+const infoStartingPosition = document.getElementById("infoStartingPosition");
+const infoInitialVelocity = document.getElementById("infoInitialVelocity");
+const infoLaunchAngle = document.getElementById("infoLaunchAngle");
+const infoAdjustableParam = document.getElementById("infoAdjustableParam");
+
+const controlsInfo = document.getElementById("controlsInfo");
+const simulationInfo = document.getElementById("simulationInfo");
+
+const simPosition = document.getElementById("simPosition");
+const simVelocity = document.getElementById("simVelocity");
+const simTime = document.getElementById("simTime");
+
 function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
 }
@@ -229,15 +241,85 @@ function updateDisplayFromInput(textInput, slider, display) {
     textInput.value = value;
 }
 
+function setControlVisibility(adjustableParameter) {
+    angleControl.classList.add("hidden");
+    velocityControl.classList.add("hidden");
+    heightControl.classList.add("hidden");
+    if (adjustableParameter === "angle") {
+        angleControl.classList.remove("hidden");
+    } else if (adjustableParameter === "velocity") {
+        velocityControl.classList.remove("hidden");
+    } else if (adjustableParameter === "height") {
+        heightControl.classList.remove("hidden");
+    }
+}
+
+function updateControlsInfo() {
+    const levelData = levelConfigs[currentLevel];
+    const targetPos = levelData.targetPosition;
+    const adjustableParam = levelData.adjustableParameter;
+    
+    let startHeight = 0;
+    if (adjustableParam === "height") {
+        startHeight = Number(activeSlider.value);
+    } else {
+        startHeight = levelData.initialHeight !== undefined ? levelData.initialHeight : 0;
+    }
+    
+    infoTargetPosition.textContent = `Target Position: (${targetPos[0]}, ${targetPos[1]})`;
+    infoStartingPosition.textContent = `Starting Position: (0, ${startHeight})`;
+    infoInitialVelocity.textContent = `Initial Velocity: ${levelData.initialVelocity !== undefined ? levelData.initialVelocity : "(adjustable)"}`;
+    infoLaunchAngle.textContent = `Angle of Launch: ${levelData.launchAngle !== undefined ? levelData.launchAngle : "(adjustable)"}`;
+    
+    if (adjustableParam === "angle") {
+        infoAdjustableParam.textContent = `Angle of Launch: (adjustable) = ${Number(angleSlider.value)}°`;
+    } else if (adjustableParam === "velocity") {
+        infoAdjustableParam.textContent = `Initial Velocity: (adjustable) = ${Number(velocitySlider.value)}`;
+    } else if (adjustableParam === "height") {
+        infoAdjustableParam.textContent = `Starting Position: (0, (adjustable)) = (0, ${Number(heightSlider.value)})`;
+    }
+}
+
+let activeSlider, activeDisplay, activeInput;
+
 function applyLevelValues() {
     if (!levelConfigs[currentLevel]) return;
     const levelData = levelConfigs[currentLevel];
-    angleSlider.value = levelData.launchAngle;
-    velocitySlider.value = levelData.initialVelocity;
-    heightSlider.value = levelData.initialHeight;
-    updateDisplayFromSlider(angleSlider, angleValue, angleInput);
-    updateDisplayFromSlider(velocitySlider, velocityValue, velocityInput);
-    updateDisplayFromSlider(heightSlider, heightValue, heightInput);
+    setControlVisibility(levelData.adjustableParameter);
+
+    const fixedAngle = levelData.launchAngle;
+    const fixedVelocity = levelData.initialVelocity;
+    const fixedHeight = levelData.initialHeight;
+
+    if (levelData.adjustableParameter === "angle") {
+        activeSlider = angleSlider;
+        activeDisplay = angleValue;
+        activeInput = angleInput;
+    } else if (levelData.adjustableParameter === "velocity") {
+        activeSlider = velocitySlider;
+        activeDisplay = velocityValue;
+        activeInput = velocityInput;
+    } else {
+        activeSlider = heightSlider;
+        activeDisplay = heightValue;
+        activeInput = heightInput;
+    }
+
+    const [minConstraint, maxConstraint] = levelData.constraintRange || [0, 100];
+    activeSlider.min = minConstraint;
+    activeSlider.max = maxConstraint;
+    const defaultValue = Math.round((minConstraint + maxConstraint) / 2);
+    activeSlider.value = clamp(defaultValue, minConstraint, maxConstraint);
+    activeDisplay.textContent = activeSlider.value;
+    activeInput.value = activeSlider.value;
+
+    if (fixedAngle !== undefined) angleSlider.value = fixedAngle;
+    if (fixedVelocity !== undefined) velocitySlider.value = fixedVelocity;
+    if (fixedHeight !== undefined) heightSlider.value = fixedHeight;
+
+    controlsInfo.classList.remove("hidden");
+    simulationInfo.classList.add("hidden");
+    updateControlsInfo();
 }
 
 angleSlider.addEventListener("input", () => updateDisplayFromSlider(angleSlider, angleValue, angleInput));
@@ -247,6 +329,10 @@ heightSlider.addEventListener("input", () => updateDisplayFromSlider(heightSlide
 angleInput.addEventListener("input", () => updateDisplayFromInput(angleInput, angleSlider, angleValue));
 velocityInput.addEventListener("input", () => updateDisplayFromInput(velocityInput, velocitySlider, velocityValue));
 heightInput.addEventListener("input", () => updateDisplayFromInput(heightInput, heightSlider, heightValue));
+
+angleSlider.addEventListener("input", () => updateControlsInfo());
+velocitySlider.addEventListener("input", () => updateControlsInfo());
+heightSlider.addEventListener("input", () => updateControlsInfo());
 
 document.addEventListener("DOMContentLoaded", () => {
     angleValue.textContent = angleSlider.value;
@@ -258,6 +344,15 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 let simRunning = false;
+
+function updateDisplay(p, v, t){
+    const canvasWidth = 800;
+    const scale = canvasWidth / 100;
+    
+    simPosition.textContent = `Position: (${p[0].toFixed(2)}, ${p[1].toFixed(2)})`;
+    simVelocity.textContent = `Velocity: (${v[0].toFixed(2)}, ${v[1].toFixed(2)})`;
+    simTime.textContent = `Time: ${(t / 1000).toFixed(3)}s`;
+}
 
 function physicsSimulation() {
     let accel = [0, -9.81];
@@ -274,6 +369,9 @@ function physicsSimulation() {
 
     simRunning = true;
 
+    controlsInfo.classList.add("hidden");
+    simulationInfo.classList.remove("hidden");
+
     function loop() {
         if (!simRunning) return;
 
@@ -288,6 +386,8 @@ function physicsSimulation() {
 
         vel[0] += accel[0] * dt / 1000;
         vel[1] += accel[1] * dt / 1000;
+
+        updateDisplay(pos, vel, elapsed);
 
         // ground hit
         if (pos[1] <= 0) {

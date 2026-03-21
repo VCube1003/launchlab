@@ -37,21 +37,21 @@
         <button class="return" onclick="backToLevels()">Back</button>
 
         <div class="controls">
-            <div>
+            <div id="angleControl">
                 <label>Angle:</label>
                 <input type="range" id="angleSlider" min="0" max="90" value="0">
                 <span id="angleValue">0</span>
                 <input type="number" id="angleInput" min="0" max="90" value="0" style="width: 70px; margin-left: 8px;">
             </div>
 
-            <div>
+            <div id="velocityControl">
                 <label>Velocity:</label>
                 <input type="range" id="velocitySlider" min="0" max="100" value="0">
                 <span id="velocityValue">0</span>
                 <input type="number" id="velocityInput" min="0" max="100" value="0" style="width: 70px; margin-left: 8px;">
             </div>
 
-            <div>
+            <div id="heightControl">
                 <label>Height:</label>
                 <input type="range" id="heightSlider" min="0" max="100" value="0">
                 <span id="heightValue">0</span>
@@ -59,6 +59,22 @@
             </div>
 
             <button onclick="launchProjectile()">Launch</button>
+        </div>
+
+        <div id="controlsInfo" class="info-box">
+            <h3>Information</h3>
+            <p id="infoTargetPosition">Target Position: -</p>
+            <p id="infoStartingPosition">Starting Position: -</p>
+            <p id="infoInitialVelocity">Initial Velocity: -</p>
+            <p id="infoLaunchAngle">Angle of Launch: -</p>
+            <p id="infoAdjustableParam">-</p>
+        </div>
+
+        <div id="simulationInfo" class="info-box hidden">
+            <h3>Simulation</h3>
+            <p id="simPosition">Position: -</p>
+            <p id="simVelocity">Velocity: -</p>
+            <p id="simTime">Time: -</p>
         </div>
 
     </div>
