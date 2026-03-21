@@ -4,7 +4,10 @@ const gameScreen = document.getElementById("gameScreen");
 
 levelsScreen.classList.add("hidden");
 gameScreen.classList.add("hidden");
+saveModal.classList.add("hidden");
+loadModal.classList.add("hidden");
 
+let numLevels = 8;
 let levelCompletions = [false, false, false, false, false, false, false, false];
 let bestTimes = [null, null, null, null, null, null, null, null];
 
@@ -71,15 +74,63 @@ const levelConfigs = [{
 }
 ];
 
+function saveCodeTimeValidation(time){
+    return /^\d+(\.\d{1,3})?$/.test(time);
+}
+
 function encode(){
     let code = "";
-    for (i = 0; i < levelCompletions.length; i++){
+    for (i = 0; i < numLevels; i++){
         code += levelCompletions[i] ? "1" : "0";
     }
-    for (i = 0; i < bestTimes.length; i++){
+    for (i = 0; i < numLevels; i++){
         code += "|" + (bestTimes[i] !== null ? String(bestTimes[i]) : "null");
     }
     return code;
+}
+
+function decode(code){
+    let parts = code.split("|");
+    if (parts.length !== numLevels+1 || parts[0].length !== numLevels) {
+        return false;
+    }
+    for (i = 0; i < numLevels; i++){
+        if (parts[0][i] !== "0" && parts[0][i] !== "1"){
+            return false;
+        }
+    }
+    for (i = 1; i < parts.length; i++){
+        if (!saveCodeTimeValidation(parts[i]) && !(parts[i] === "null")) {
+            return false;
+        }
+    }
+    for (i = 0; i < numLevels; i++){
+        if (parts[0][i] === "1"){
+            levelCompletions[i] = true;
+        }
+        else{
+            levelCompletions[i] = false;
+        }
+    }
+    for (i = 1; i < parts.length; i++){
+        if (parts[i] === "null"){
+            bestTimes[i - 1] = null;
+        }
+        else{
+            bestTimes[i - 1] = Number(parts[i]);
+        }
+    }
+    return true;
+}
+
+function copySaveCode() {
+    let box = document.getElementById("saveCodeBox");
+    box.select();
+    document.execCommand("copy");
+}
+
+function closeSave() {
+    document.getElementById("saveModal").style.display = "none";
 }
 
 function startGame() {
@@ -88,15 +139,38 @@ function startGame() {
 }
 
 function saveGame() {
-    alert(encode());
+    saveModal.classList.remove("hidden");
+
+    let code = encode();
+
+    document.getElementById("saveCodeBox").value = code;
+    document.getElementById("saveModal").style.display = "flex";
+
+    navigator.clipboard.writeText(code).catch(() => {});
 }
 
 function loadGame() {
-    alert("Load Game")
+    loadModal.classList.remove("hidden");
+    document.getElementById("loadModal").style.display = "flex";
+}
+
+function confirmLoad() {
+    let code = document.getElementById("loadCodeInput").value;
+
+    if (decode(code)) {
+        alert("Save loaded successfully!");
+        closeLoad();
+    } else {
+        alert("Invalid save code.");
+    }
+}
+
+function closeLoad() {
+    document.getElementById("loadModal").style.display = "none";
 }
 
 function howToPlay(){
-    alert("How to Play")
+    alert("How to Play");
 }
 
 function mainMenu(){
@@ -224,7 +298,7 @@ function physicsSimulation() {
 
                 alert(`Level ${currentLevel + 1} Complete! Time: ${finalTime}s`);
 
-                if (!levelCompletions[currentLevel] || elapsed < bestTimes[currentLevel]) {
+                if ((!levelCompletions[currentLevel]) || (finalTime < bestTimes[currentLevel])) {
                     levelCompletions[currentLevel] = true;
                     bestTimes[currentLevel] = finalTime;
                 }

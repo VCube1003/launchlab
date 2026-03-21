@@ -63,6 +63,24 @@
 
     </div>
 
+    <div id="saveModal" class="modal">
+        <div class="modal-content">
+            <h2>Save Game</h2>
+            <input type="text" id="saveCodeBox" readonly>
+            <button onclick="copySaveCode()">Copy</button>
+            <button onclick="closeSave()">Close</button>
+        </div>
+    </div>
+
+    <div id="loadModal" class="modal">
+        <div class="modal-content">
+            <h2>Load Game</h2>
+            <input type="text" id="loadCodeInput" placeholder="Enter save code">
+            <button onclick="confirmLoad()">Load</button>
+            <button onclick="closeLoad()">Cancel</button>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
