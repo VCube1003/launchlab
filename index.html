@@ -17,14 +17,14 @@
     <div class="level-selector-screen" id="levels">
         <h1>LEVELS</h1>
         <div class="level-selector-buttons">
-            <button class="level-selector-btn" onclick="level(1)">Level <br> 1</button>
-            <button class="level-selector-btn" onclick="level(2)">Level <br> 2</button>
-            <button class="level-selector-btn" onclick="level(3)">Level <br> 3</button>
-            <button class="level-selector-btn" onclick="level(4)">Level <br> 4</button>
-            <button class="level-selector-btn" onclick="level(5)">Level <br> 5</button>
-            <button class="level-selector-btn" onclick="level(6)">Level <br> 6</button>
-            <button class="level-selector-btn" onclick="level(7)">Level <br> 7</button>
-            <button class="level-selector-btn" onclick="level(8)">Level <br> 8</button>
+            <button class="level-selector-btn" id="l1" onclick="level(1)">Level <br> 1</button>
+            <button class="level-selector-btn" id="l2" onclick="level(2)">Level <br> 2</button>
+            <button class="level-selector-btn" id="l3" onclick="level(3)">Level <br> 3</button>
+            <button class="level-selector-btn" id="l4" onclick="level(4)">Level <br> 4</button>
+            <button class="level-selector-btn" id="l5" onclick="level(5)">Level <br> 5</button>
+            <button class="level-selector-btn" id="l6" onclick="level(6)">Level <br> 6</button>
+            <button class="level-selector-btn" id="l7" onclick="level(7)">Level <br> 7</button>
+            <button class="level-selector-btn" id="l8" onclick="level(8)">Level <br> 8</button>
         </div>
         <button class="return" onclick="mainMenu()">Back</button>
     </div>
@@ -67,7 +67,6 @@
             <p id="infoStartingPosition">Starting Position: -</p>
             <p id="infoInitialVelocity">Initial Velocity: -</p>
             <p id="infoLaunchAngle">Angle of Launch: -</p>
-            <p id="infoAdjustableParam">-</p>
         </div>
 
         <div id="simulationInfo" class="info-box hidden">
