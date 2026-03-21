@@ -29,38 +29,36 @@
         <button class="return" onclick="mainMenu()">Back</button>
     </div>
 
-    <div class="level-screen" id="level">
 
-        <div class="level-1" id="levelone">
-            <h1>Level 1 stuff</h1>
-        </div>
+    <div class="game-screen" id="gameScreen">
 
-        <div class="level-2" id="leveltwo">
-            <h1>Level 2 stuff</h1>
-        </div>
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
 
-        <div class="level-3" id="levelthree">
-            <h1>Level 3 stuff</h1>
-        </div>
+        <button class="return" onclick="mainMenu()">Back</button>
 
-        <div class="level-4" id="levelfour">
-            <h1>Level 4 stuff</h1>
-        </div>
+        <div class="controls">
+            <div>
+                <label>Angle:</label>
+                <input type="range" id="angleSlider" min="0" max="90" value="0">
+                <span id="angleValue">0</span>
+                <input type="number" id="angleInput" min="0" max="90" value="0" style="width: 70px; margin-left: 8px;">
+            </div>
 
-        <div class="level-5" id="levelfive">
-            <h1>Level 5 stuff</h1>
-        </div>
+            <div>
+                <label>Velocity:</label>
+                <input type="range" id="velocitySlider" min="0" max="100" value="0">
+                <span id="velocityValue">0</span>
+                <input type="number" id="velocityInput" min="0" max="100" value="0" style="width: 70px; margin-left: 8px;">
+            </div>
 
-        <div class="level-6" id="levelsix">
-            <h1>Level 6 stuff</h1>
-        </div>
+            <div>
+                <label>Height:</label>
+                <input type="range" id="heightSlider" min="0" max="100" value="0">
+                <span id="heightValue">0</span>
+                <input type="number" id="heightInput" min="0" max="100" value="0" style="width: 70px; margin-left: 8px;">
+            </div>
 
-        <div class="level-7" id="levelseven">
-            <h1>Level 7 stuff</h1>
-        </div>
-
-        <div class="level-8" id="leveleight">
-            <h1>Level 8 stuff</h1>
+            <button onclick="launchProjectile()">Launch</button>
         </div>
 
     </div>
