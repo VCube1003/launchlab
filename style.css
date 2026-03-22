@@ -78,8 +78,8 @@ body {
 }
 
 .level-selector-screen h1{
-    margin-bottom: 40px;  /* Adjust this number to increase/decrease the gap */
-    text-align: center;   /* Keeps your title centered */
+    margin-bottom: 40px;
+    text-align: center;
 }
 
 .game-screen {
