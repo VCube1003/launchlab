@@ -279,6 +279,67 @@ function updateControlsInfo() {
     infoLaunchAngle.textContent = `Angle of Launch: ${currentAngle}°`;
 }
 
+function getCurrentHeight() {
+    const levelData = levelConfigs[currentLevel];
+    if (levelData.adjustableParameter === "height") {
+        return Number(heightSlider.value);
+    }
+    return Number(levelData.initialHeight || 0);
+}
+
+function getCurrentLaunchAngle() {
+    const levelData = levelConfigs[currentLevel];
+    if (levelData.adjustableParameter === "angle") {
+        return Number(angleSlider.value);
+    }
+    return Number(levelData.launchAngle || 0);
+}
+
+function drawStaticScene(goal) {
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const scale = 7;
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+
+    // Clear all
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+    // Ground
+    ctx.fillStyle = "lightgreen";
+    const groundHeight = 35;
+    ctx.fillRect(0, canvasHeight - groundHeight, canvasWidth, groundHeight);
+
+    // Flag at target
+    const goalX = goal[0] * scale;
+    const goalY = canvasHeight - groundHeight - goal[1] * scale;
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(goalX, goalY);
+    ctx.lineTo(goalX, goalY - 30);
+    ctx.stroke();
+    ctx.fillStyle = "red";
+    ctx.fillRect(goalX, goalY - 30, 15, 10);
+
+    // Cannon base position (left side)
+    const cannonX = 5;
+    const cannonTopY = canvasHeight - groundHeight - getCurrentHeight() * scale;
+    const angle = getCurrentLaunchAngle();
+
+    // Draw cannon arm with rotation from horizontal
+    ctx.save();
+    ctx.translate(cannonX, cannonTopY);
+    ctx.rotate(-angle * Math.PI / 180); // canvas y+ is down
+    ctx.fillStyle = "gray";
+    ctx.fillRect(0, -7, 45, 14); // cannon barrel length
+    ctx.restore();
+
+    // Draw cannon base
+    ctx.fillStyle = "black";
+    ctx.fillRect(cannonX - 5, cannonTopY - 10, 15, 20);
+}
+
 let activeSlider, activeDisplay, activeInput;
 
 function applyLevelValues() {
@@ -321,12 +382,8 @@ function applyLevelValues() {
     updateControlsInfo();
     
     // Draw static canvas elements
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-    const scale = 7;
-    const canvasHeight = 400;
     const goal = levelData.targetPosition;
-    updateDisplay([0, levelData.initialHeight || 0], [0,0], 0, ctx, scale, canvasHeight, goal);
+    updateDisplay([0, levelData.initialHeight || 0], [0,0], 0, goal);
 }
 
 angleSlider.addEventListener("input", () => updateDisplayFromSlider(angleSlider, angleValue, angleInput));
@@ -337,13 +394,31 @@ angleInput.addEventListener("input", () => updateDisplayFromInput(angleInput, an
 velocityInput.addEventListener("input", () => updateDisplayFromInput(velocityInput, velocitySlider, velocityValue));
 heightInput.addEventListener("input", () => updateDisplayFromInput(heightInput, heightSlider, heightValue));
 
-angleInput.addEventListener("input", () => updateControlsInfo());
-velocityInput.addEventListener("input", () => updateControlsInfo());
-heightInput.addEventListener("input", () => updateControlsInfo());
+angleInput.addEventListener("input", () => {
+    updateControlsInfo();
+    drawStaticScene(levelConfigs[currentLevel].targetPosition);
+});
+velocityInput.addEventListener("input", () => {
+    updateControlsInfo();
+    drawStaticScene(levelConfigs[currentLevel].targetPosition);
+});
+heightInput.addEventListener("input", () => {
+    updateControlsInfo();
+    drawStaticScene(levelConfigs[currentLevel].targetPosition);
+});
 
-angleSlider.addEventListener("input", () => updateControlsInfo());
-velocitySlider.addEventListener("input", () => updateControlsInfo());
-heightSlider.addEventListener("input", () => updateControlsInfo());
+angleSlider.addEventListener("input", () => {
+    updateControlsInfo();
+    drawStaticScene(levelConfigs[currentLevel].targetPosition);
+});
+velocitySlider.addEventListener("input", () => {
+    updateControlsInfo();
+    drawStaticScene(levelConfigs[currentLevel].targetPosition);
+});
+heightSlider.addEventListener("input", () => {
+    updateControlsInfo();
+    drawStaticScene(levelConfigs[currentLevel].targetPosition);
+});
 
 document.addEventListener("DOMContentLoaded", () => {
     angleValue.textContent = angleSlider.value;
@@ -357,41 +432,21 @@ document.addEventListener("DOMContentLoaded", () => {
 let simRunning = false;
 let isSimulating = false;
 
-function updateDisplay(p, v, t, ctx, scale, canvasHeight, goal){
-    const canvasWidth = 800;
-    
+function updateDisplay(p, v, t, goal){
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const scale = 7;
+    const canvasHeight = canvas.height;
+
     simPosition.textContent = `Position: (${p[0].toFixed(2)}, ${p[1].toFixed(2)})`;
     simVelocity.textContent = `Velocity: (${v[0].toFixed(2)}, ${v[1].toFixed(2)})`;
     simTime.textContent = `Time: ${(t / 1000).toFixed(3)}s`;
 
-    // Draw on canvas
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    
-    // Draw ground
-    ctx.fillStyle = "lightgreen";
-    ctx.fillRect(0, canvasHeight - 35, canvasWidth, 35);
-    
-    // Draw cannon
-    const cannonHeight = Number(heightSlider.value) * scale + 35;
-    ctx.fillStyle = "gray";
-    ctx.fillRect(0, canvasHeight - cannonHeight - 15, 20, 15);
-    
-    // Draw flag at target
-    const flagX = goal[0] * scale;
-    const flagY = canvasHeight - goal[1] * scale - 35;
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(flagX, flagY);
-    ctx.lineTo(flagX, flagY - 30);
-    ctx.stroke();
-    ctx.fillStyle = "red";
-    ctx.fillRect(flagX, flagY - 30, 15, 10);
-    
-    // Draw projectile if simulating
+    drawStaticScene(goal);
+
     if (isSimulating) {
         const x = p[0] * scale;
-        const y = canvasHeight - p[1] * scale - 42.5;
+        const y = canvasHeight - p[1] * scale - 35;
         ctx.beginPath();
         ctx.arc(x, y, 7.5, 0, 2 * Math.PI);
         ctx.fillStyle = "red";
@@ -426,7 +481,7 @@ function physicsSimulation() {
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     const scale = 7; // pixels per unit
-    const canvasHeight = 400;
+    const canvasHeight = 450;
 
     function loop() {
         if (!simRunning) return;
@@ -443,7 +498,7 @@ function physicsSimulation() {
         vel[0] += accel[0] * dt / 1000;
         vel[1] += accel[1] * dt / 1000;
 
-        updateDisplay(pos, vel, elapsed, ctx, scale, canvasHeight, goal);
+        updateDisplay(pos, vel, elapsed, goal);
 
         // ground hit
         if (pos[1] < 0) {
