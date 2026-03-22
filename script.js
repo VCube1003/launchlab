@@ -1,3 +1,5 @@
+// getting elements from HTML
+
 const menu = document.getElementById("menu");
 const levelsScreen = document.getElementById("levels");
 const gameScreen = document.getElementById("gameScreen");
@@ -6,6 +8,32 @@ const howToPlayScreen = document.getElementById("howToPlayScreen");
 const angleControl = document.getElementById("angleControl");
 const velocityControl = document.getElementById("velocityControl");
 const heightControl = document.getElementById("heightControl");
+
+const angleSlider = document.getElementById("angleSlider");
+const velocitySlider = document.getElementById("velocitySlider");
+const heightSlider = document.getElementById("heightSlider");
+
+const angleValue = document.getElementById("angleValue");
+const velocityValue = document.getElementById("velocityValue");
+const heightValue = document.getElementById("heightValue");
+
+const angleInput = document.getElementById("angleInput");
+const velocityInput = document.getElementById("velocityInput");
+const heightInput = document.getElementById("heightInput");
+
+const infoTargetPosition = document.getElementById("infoTargetPosition");
+const infoStartingPosition = document.getElementById("infoStartingPosition");
+const infoInitialVelocity = document.getElementById("infoInitialVelocity");
+const infoLaunchAngle = document.getElementById("infoLaunchAngle");
+
+const controlsInfo = document.getElementById("controlsInfo");
+const simulationInfo = document.getElementById("simulationInfo");
+
+const simPosition = document.getElementById("simPosition");
+const simVelocity = document.getElementById("simVelocity");
+const simTime = document.getElementById("simTime");
+
+// hiding stuff that's not meant to be visible on the main menu
 
 levelsScreen.classList.add("hidden");
 gameScreen.classList.add("hidden");
@@ -16,9 +44,16 @@ angleControl.classList.add("hidden");
 velocityControl.classList.add("hidden");
 heightControl.classList.add("hidden");
 
+/* setting the level completions and best times of a new save file 
+when the game is first loaded (can be edited using load save)
+*/
+
 let numLevels = 8;
 let levelCompletions = [false, false, false, false, false, false, false, false];
 let bestTimes = [null, null, null, null, null, null, null, null];
+
+// writing the configurations of each level in an array of Objects
+// each object is one level
 
 const levelConfigs = [{
     targetPosition: [50, 0],
@@ -75,15 +110,21 @@ const levelConfigs = [{
 }
 ];
 
+let currentLevel = 0; // keeps track of the current level the user is in (minus 1 to make it easier for indexing)
+
+// converts time format from seconds to M:SS.XXX to display in the level selector buttons
+
 function formatTime(seconds) {
     if (seconds === null) {
-        return "Best time: Not completed";
+        return "Best time: Not completed"; // checks whether time taken is "null" (incomplete level)
     }
     let minutes = Math.floor(seconds / 60);
     let secs = seconds % 60;
     let secStr = secs.toFixed(3).padStart(6, '0');
     return `Best time: ${minutes}:${secStr}`;
 }
+
+// update color and best times of level buttons
 
 function updateLevelButtons() {
     for (let i = 0; i < numLevels; i++) {
@@ -93,9 +134,13 @@ function updateLevelButtons() {
     }
 }
 
+// uses a regex expression to validate the best times of each level in the loaded save
+
 function saveCodeTimeValidation(time){
     return /^\d+(\.\d{1,3})?$/.test(time);
 }
+
+// generates a save code based on information about the save
 
 function encode(){
     let code = "";
@@ -108,21 +153,31 @@ function encode(){
     return code;
 }
 
+// updates variables based on a loaded save code
+
 function decode(code){
+
+    // validation
+
     let parts = code.split("|");
     if (parts.length !== numLevels+1 || parts[0].length !== numLevels) {
-        return false;
+        return false; 
     }
+
     for (i = 0; i < numLevels; i++){
         if (parts[0][i] !== "0" && parts[0][i] !== "1"){
             return false;
         }
     }
+
     for (i = 1; i < parts.length; i++){
         if (!saveCodeTimeValidation(parts[i]) && !(parts[i] === "null")) {
             return false;
         }
     }
+
+    // updating variables
+
     for (i = 0; i < numLevels; i++){
         if (parts[0][i] === "1"){
             levelCompletions[i] = true;
@@ -131,6 +186,7 @@ function decode(code){
             levelCompletions[i] = false;
         }
     }
+
     for (i = 1; i < parts.length; i++){
         if (parts[i] === "null"){
             bestTimes[i - 1] = null;
@@ -139,6 +195,7 @@ function decode(code){
             bestTimes[i - 1] = Number(parts[i]);
         }
     }
+
     return true;
 }
 
@@ -148,16 +205,14 @@ function copySaveCode() {
     document.execCommand("copy");
 }
 
-function closeSave() {
-    document.getElementById("saveModal").style.display = "none";
-}
-
+// executed upon clicking the "play" button - shows level screen
 function startGame() {
     menu.classList.add("hidden");
     levelsScreen.classList.remove("hidden");
     updateLevelButtons();
 }
 
+// executed upon clicking the "save game" button - shows save game modal
 function saveGame() {
     saveModal.classList.remove("hidden");
 
@@ -169,10 +224,17 @@ function saveGame() {
     navigator.clipboard.writeText(code).catch(() => {});
 }
 
+// closes the save modal
+function closeSave() {
+    document.getElementById("saveModal").style.display = "none";
+}
+
 function loadGame() {
     loadModal.classList.remove("hidden");
     document.getElementById("loadModal").style.display = "flex";
 }
+
+// calls decode() to validate the save code & update variables accordingly
 
 function confirmLoad() {
     let code = document.getElementById("loadCodeInput").value;
@@ -186,15 +248,18 @@ function confirmLoad() {
     }
 }
 
+// closes the load save modal
 function closeLoad() {
     document.getElementById("loadModal").style.display = "none";
 }
 
+// opens the "how to play" webpage
 function howToPlay(){
     menu.classList.add("hidden");
     howToPlayScreen.classList.remove("hidden");
 }
 
+// triggered upon clicking a button that takes you back to the main menu
 function mainMenu(){
     menu.classList.remove("hidden");
     levelsScreen.classList.add("hidden"); 
@@ -202,6 +267,7 @@ function mainMenu(){
     howToPlayScreen.classList.add("hidden");
 }
 
+// triggered upon clicking on a level - shows the game screen
 function level(num) {
     levelsScreen.classList.add("hidden");
     gameScreen.classList.remove("hidden");
@@ -210,6 +276,7 @@ function level(num) {
     startTimer();
 }
 
+// triggered upon finishing a level or exiting from it - goes back to levels screen
 function backToLevels(){
     simRunning = false;
     isSimulating = false;
@@ -218,35 +285,16 @@ function backToLevels(){
     updateLevelButtons();
 }
 
-let currentLevel = 0;
-
-const angleSlider = document.getElementById("angleSlider");
-const velocitySlider = document.getElementById("velocitySlider");
-const heightSlider = document.getElementById("heightSlider");
-
-const angleValue = document.getElementById("angleValue");
-const velocityValue = document.getElementById("velocityValue");
-const heightValue = document.getElementById("heightValue");
-
-const angleInput = document.getElementById("angleInput");
-const velocityInput = document.getElementById("velocityInput");
-const heightInput = document.getElementById("heightInput");
-
-const infoTargetPosition = document.getElementById("infoTargetPosition");
-const infoStartingPosition = document.getElementById("infoStartingPosition");
-const infoInitialVelocity = document.getElementById("infoInitialVelocity");
-const infoLaunchAngle = document.getElementById("infoLaunchAngle");
-
-const controlsInfo = document.getElementById("controlsInfo");
-const simulationInfo = document.getElementById("simulationInfo");
-
-const simPosition = document.getElementById("simPosition");
-const simVelocity = document.getElementById("simVelocity");
-const simTime = document.getElementById("simTime");
-
+// used during the user input to make sure that it stays within the scope of constraintRange
 function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
 }
+
+/* the two functions below do the following:
+1 - give live updates to the display of the value next to the slider
+2 - when one form of input is used (ex. text box or slider), the other is automatically updated for consistency 
+(ex. slider is moved based on text input)
+3 - validate the input given (whether or not it's within the constraint range) */
 
 function updateDisplayFromSlider(slider, display, textInput) {
     let value = Number(slider.value);
@@ -267,6 +315,9 @@ function updateDisplayFromInput(textInput, slider, display) {
     textInput.value = value;
 }
 
+/* controls what slider / text input is visible 
+(since only one of the three parameters is adjustable in any given level) */
+
 function setControlVisibility(adjustableParameter) {
     angleControl.classList.add("hidden");
     velocityControl.classList.add("hidden");
@@ -280,11 +331,13 @@ function setControlVisibility(adjustableParameter) {
     }
 }
 
+// update the "Information" section of the game screen
+
 function updateControlsInfo() {
     const levelData = levelConfigs[currentLevel];
     const targetPos = levelData.targetPosition;
     
-    // Get current values
+    // get current values
     let currentHeight = levelData.initialHeight !== undefined ? levelData.initialHeight : 0;
     if (levelData.adjustableParameter === "height") {
         currentHeight = Number(heightSlider.value);
@@ -322,6 +375,7 @@ function getCurrentLaunchAngle() {
     return Number(levelData.launchAngle || 0);
 }
 
+// draws the items on the canvas (projectile, cannon, etc)
 function drawStaticScene(goal) {
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
@@ -369,6 +423,7 @@ function drawStaticScene(goal) {
 
 let activeSlider, activeDisplay, activeInput;
 
+// upon entering a level, this takes in data about the level from the levelConfigs array
 function applyLevelValues() {
     if (!levelConfigs[currentLevel]) return;
     const levelData = levelConfigs[currentLevel];
@@ -408,10 +463,12 @@ function applyLevelValues() {
     simulationInfo.classList.add("hidden");
     updateControlsInfo();
     
-    // Draw static canvas elements
+    // draw static canvas elements
     const goal = levelData.targetPosition;
     updateDisplay([0, levelData.initialHeight || 0], [0,0], 0, goal, []);
 }
+
+// listens to input from the user to call functions that give the relevant live update
 
 angleSlider.addEventListener("input", () => updateDisplayFromSlider(angleSlider, angleValue, angleInput));
 velocitySlider.addEventListener("input", () => updateDisplayFromSlider(velocitySlider, velocityValue, velocityInput));
@@ -465,13 +522,16 @@ function updateDisplay(p, v, t, goal, trail){
     const scale = 7;
     const canvasHeight = canvas.height;
 
+    // updates the information in the "Simulation" box while the projectile is moving
+
     simPosition.textContent = `Position: (${p[0].toFixed(2)}, ${p[1].toFixed(2)})`;
     simVelocity.textContent = `Velocity: (${v[0].toFixed(2)}, ${v[1].toFixed(2)})`;
     simTime.textContent = `Time: ${(t / 1000).toFixed(3)}s`;
 
     drawStaticScene(goal);
 
-    // Draw trail
+    // draws the dotted trail that follows the projectile's motion
+
     ctx.fillStyle = "red";
     for (let point of trail) {
         const x = point[0] * scale;
@@ -491,23 +551,29 @@ function updateDisplay(p, v, t, goal, trail){
     }
 }
 
+// changes a level button's color from red to green (activated upon that level's completion)
+
 function updateButtonColor(levelNum){
     const levelBtn = document.getElementById(`l${levelNum}`);
     levelBtn.style.backgroundColor = "#c1ff72";
 }
 
+// simulates the movement of the projectile
+
 function physicsSimulation() {
+
+    // initial conditions
+
     let accel = [0, -9.81];
     let vel = [
         Number(velocitySlider.value) * Math.cos(Number(angleSlider.value) * Math.PI / 180),
         Number(velocitySlider.value) * Math.sin(Number(angleSlider.value) * Math.PI / 180)
     ];
-
     let pos = [0, Number(heightSlider.value)];
     let t = Date.now();
     let elapsed = 0;
 
-    const goal = levelConfigs[currentLevel].targetPosition;
+    const goal = levelConfigs[currentLevel].targetPosition; // target that needs to be reached
 
     simRunning = true;
     isSimulating = true;
@@ -517,10 +583,10 @@ function physicsSimulation() {
 
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    const scale = 7; // pixels per unit
+    const scale = 7; // pixels per unit (to display on the canvas)
     const canvasHeight = 450;
 
-    let trail = [];
+    let trail = []; // stores previous positions (needed for drawing the trail)
 
     function loop() {
         if (!simRunning) return;
@@ -542,12 +608,14 @@ function physicsSimulation() {
 
         updateDisplay(pos, vel, elapsed, goal, trail);
 
-        // ground hit
+        // stop simulation upon ground hit
         if (pos[1] < 0) {
             simRunning = false;
             isSimulating = false;
 
-            if (Math.hypot(pos[0] - goal[0], pos[1] - goal[1]) < 5) {
+            /* win condition - checks whether or not the euclidean distance between the projectile's current position 
+            and the goal position is less than 5 units */
+            if (Math.hypot(pos[0] - goal[0], pos[1] - goal[1]) < 5) { // success
                 let finalTime = stopTimer() / 1000;
 
                 alert(`Level ${currentLevel + 1} Complete! Time: ${finalTime.toFixed(3)}s`);
@@ -558,7 +626,7 @@ function physicsSimulation() {
                 }
                 updateButtonColor(currentLevel + 1);
                 backToLevels();
-            } else {
+            } else { // fail
                 alert('Level failed - try again!');
                 const adjustableParam = levelConfigs[currentLevel].adjustableParameter;
                 if (adjustableParam === "angle") {
@@ -581,6 +649,7 @@ function physicsSimulation() {
     loop();
 }
 
+// Activated upon clicking on the "Launch" button
 function launchProjectile(){
     pauseTimer();
     isSimulating = true;
@@ -594,6 +663,8 @@ function launchProjectile(){
     }
     physicsSimulation();
 }
+
+// Timer functionalities (keeps track of the time taken for the user to complete the level)
 
 let startTime = 0;
 let elapsedTime = 0;
