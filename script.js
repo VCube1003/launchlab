@@ -60,57 +60,67 @@ const levelConfigs = [{
     initialVelocity: 25,
     launchAngle: 0,
     adjustableParameter: "height",
-    constraintRange: [0, 50]
+    constraintRange: [0, 50],
+    randomizationFactors: { initialVelocity: 10, targetX: 20 }
 }, {
     targetPosition: [30, 0],
     initialHeight: 0,
     launchAngle: 30,
     adjustableParameter: "velocity",
-    constraintRange: [0, 100]
+    constraintRange: [0, 100],
+    randomizationFactors: { targetX: 5, launchAngle: 10 }
 }, {
     targetPosition: [50, 0],
     initialHeight: 0,
     initialVelocity: 25,
     adjustableParameter: "angle",
-    constraintRange: [-90, 90]
+    constraintRange: [-90, 90],
+    randomizationFactors: { initialVelocity: 5, targetX: 10 }
 }, {
     targetPosition: [100, 0],
     initialHeight: 30,
     launchAngle: 45,
     adjustableParameter: "velocity",
-    constraintRange: [0, 100]
+    constraintRange: [0, 100],
+    randomizationFactors: { targetX: 10 }
 }, 
 {
     targetPosition: [75, 0],
     initialVelocity: 22,
     launchAngle: 30,
     adjustableParameter: "height",
-    constraintRange: [0, 50]
+    constraintRange: [0, 50],
+    randomizationFactors: { launchAngle: 5, targetX: 10 }
 }, 
 {
     targetPosition: [50, 0],
     initialHeight: 50,
     initialVelocity: 20,
     adjustableParameter: "angle",
-    constraintRange: [-90, 90]
+    constraintRange: [-90, 90],
+    randomizationFactors: { initialVelocity: 5, targetX: 10 }
 }, 
 {
     targetPosition: [20, 0],
     initialHeight: 50,
-    launchAngle: -45,
+    launchAngle: -40,
     adjustableParameter: "velocity",
-    constraintRange: [0, 100]
+    constraintRange: [0, 100],
+    randomizationFactors: { targetX: 5, launchAngle: 5 }
 }, 
 {
-    targetPosition: [100, 0],
+    targetPosition: [95, 0],
     initialHeight: 25,
     initialVelocity: 50,
     adjustableParameter: "angle",
-    constraintRange: [-90, 90]
+    constraintRange: [-90, 90],
+    randomizationFactors: { targetX: 15, initialHeight: 10 }
 }
 ];
 
 let currentLevel = 0; // keeps track of the current level the user is in (minus 1 to make it easier for indexing)
+
+let currentLevelData; // holds the randomized level configuration for the current level
 
 // converts time format from seconds to M:SS.XXX to display in the level selector buttons
 
@@ -334,45 +344,42 @@ function setControlVisibility(adjustableParameter) {
 // update the "Information" section of the game screen
 
 function updateControlsInfo() {
-    const levelData = levelConfigs[currentLevel];
-    const targetPos = levelData.targetPosition;
+    const targetPos = currentLevelData.targetPosition;
     
     // get current values
-    let currentHeight = levelData.initialHeight !== undefined ? levelData.initialHeight : 0;
-    if (levelData.adjustableParameter === "height") {
+    let currentHeight = currentLevelData.initialHeight !== undefined ? currentLevelData.initialHeight : 0;
+    if (currentLevelData.adjustableParameter === "height") {
         currentHeight = Number(heightSlider.value);
     }
     
-    let currentVelocity = levelData.initialVelocity !== undefined ? levelData.initialVelocity : 0;
-    if (levelData.adjustableParameter === "velocity") {
+    let currentVelocity = currentLevelData.initialVelocity !== undefined ? currentLevelData.initialVelocity : 0;
+    if (currentLevelData.adjustableParameter === "velocity") {
         currentVelocity = Number(velocitySlider.value);
     }
     
-    let currentAngle = levelData.launchAngle !== undefined ? levelData.launchAngle : 0;
-    if (levelData.adjustableParameter === "angle") {
+    let currentAngle = currentLevelData.launchAngle !== undefined ? currentLevelData.launchAngle : 0;
+    if (currentLevelData.adjustableParameter === "angle") {
         currentAngle = Number(angleSlider.value);
     }
     
-    infoTargetPosition.textContent = `Target Position: (${targetPos[0]}, ${targetPos[1]})`;
-    infoStartingPosition.textContent = `Starting Position: (0, ${currentHeight})`;
-    infoInitialVelocity.textContent = `Initial Velocity: ${currentVelocity}`;
-    infoLaunchAngle.textContent = `Angle of Launch: ${currentAngle}°`;
+    infoTargetPosition.textContent = `Target Position: (${targetPos[0].toFixed(1)}, ${targetPos[1]})`;
+    infoStartingPosition.textContent = `Starting Position: (0, ${currentHeight.toFixed(1)})`;
+    infoInitialVelocity.textContent = `Initial Velocity: ${currentVelocity.toFixed(1)}`;
+    infoLaunchAngle.textContent = `Angle of Launch: ${currentAngle.toFixed(1)}°`;
 }
 
 function getCurrentHeight() {
-    const levelData = levelConfigs[currentLevel];
-    if (levelData.adjustableParameter === "height") {
+    if (currentLevelData.adjustableParameter === "height") {
         return Number(heightSlider.value);
     }
-    return Number(levelData.initialHeight || 0);
+    return Number(currentLevelData.initialHeight || 0);
 }
 
 function getCurrentLaunchAngle() {
-    const levelData = levelConfigs[currentLevel];
-    if (levelData.adjustableParameter === "angle") {
+    if (currentLevelData.adjustableParameter === "angle") {
         return Number(angleSlider.value);
     }
-    return Number(levelData.launchAngle || 0);
+    return Number(currentLevelData.launchAngle || 0);
 }
 
 // draws the items on the canvas (projectile, cannon, etc)
@@ -427,11 +434,34 @@ let activeSlider, activeDisplay, activeInput;
 function applyLevelValues() {
     if (!levelConfigs[currentLevel]) return;
     const levelData = levelConfigs[currentLevel];
+
+    // Create randomized level data
+    currentLevelData = { ...levelData };
+    currentLevelData.targetPosition = [...levelData.targetPosition];
+
+    if (levelData.randomizationFactors) {
+        if (levelData.adjustableParameter !== "velocity" && levelData.randomizationFactors.initialVelocity) {
+            currentLevelData.initialVelocity += (Math.random() - 0.5) * 2 * levelData.randomizationFactors.initialVelocity;
+            currentLevelData.initialVelocity = Math.max(0, currentLevelData.initialVelocity);
+        }
+        if (levelData.adjustableParameter !== "angle" && levelData.randomizationFactors.launchAngle) {
+            currentLevelData.launchAngle += (Math.random() - 0.5) * 2 * levelData.randomizationFactors.launchAngle;
+        }
+        if (levelData.adjustableParameter !== "height" && levelData.randomizationFactors.initialHeight) {
+            currentLevelData.initialHeight += (Math.random() - 0.5) * 2 * levelData.randomizationFactors.initialHeight;
+            currentLevelData.initialHeight = Math.max(0, currentLevelData.initialHeight);
+        }
+        if (levelData.randomizationFactors.targetX) {
+            currentLevelData.targetPosition[0] += (Math.random() - 0.5) * 2 * levelData.randomizationFactors.targetX;
+            currentLevelData.targetPosition[0] = Math.max(0, currentLevelData.targetPosition[0]);
+        }
+    }
+
     setControlVisibility(levelData.adjustableParameter);
 
-    const fixedAngle = levelData.launchAngle;
-    const fixedVelocity = levelData.initialVelocity;
-    const fixedHeight = levelData.initialHeight;
+    const fixedAngle = currentLevelData.launchAngle;
+    const fixedVelocity = currentLevelData.initialVelocity;
+    const fixedHeight = currentLevelData.initialHeight;
 
     if (levelData.adjustableParameter === "angle") {
         activeSlider = angleSlider;
@@ -464,8 +494,8 @@ function applyLevelValues() {
     updateControlsInfo();
     
     // draw static canvas elements
-    const goal = levelData.targetPosition;
-    updateDisplay([0, levelData.initialHeight || 0], [0,0], 0, goal, []);
+    const goal = currentLevelData.targetPosition;
+    updateDisplay([0, currentLevelData.initialHeight || 0], [0,0], 0, goal, []);
 }
 
 // listens to input from the user to call functions that give the relevant live update
@@ -480,28 +510,28 @@ heightInput.addEventListener("input", () => updateDisplayFromInput(heightInput, 
 
 angleInput.addEventListener("input", () => {
     updateControlsInfo();
-    drawStaticScene(levelConfigs[currentLevel].targetPosition);
+    drawStaticScene(currentLevelData.targetPosition);
 });
 velocityInput.addEventListener("input", () => {
     updateControlsInfo();
-    drawStaticScene(levelConfigs[currentLevel].targetPosition);
+    drawStaticScene(currentLevelData.targetPosition);
 });
 heightInput.addEventListener("input", () => {
     updateControlsInfo();
-    drawStaticScene(levelConfigs[currentLevel].targetPosition);
+    drawStaticScene(currentLevelData.targetPosition);
 });
 
 angleSlider.addEventListener("input", () => {
     updateControlsInfo();
-    drawStaticScene(levelConfigs[currentLevel].targetPosition);
+    drawStaticScene(currentLevelData.targetPosition);
 });
 velocitySlider.addEventListener("input", () => {
     updateControlsInfo();
-    drawStaticScene(levelConfigs[currentLevel].targetPosition);
+    drawStaticScene(currentLevelData.targetPosition);
 });
 heightSlider.addEventListener("input", () => {
     updateControlsInfo();
-    drawStaticScene(levelConfigs[currentLevel].targetPosition);
+    drawStaticScene(currentLevelData.targetPosition);
 });
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -573,7 +603,7 @@ function physicsSimulation() {
     let t = Date.now();
     let elapsed = 0;
 
-    const goal = levelConfigs[currentLevel].targetPosition; // target that needs to be reached
+    const goal = currentLevelData.targetPosition; // target that needs to be reached
 
     simRunning = true;
     isSimulating = true;
