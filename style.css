@@ -86,6 +86,23 @@ body {
     background-color: skyblue;
 }
 
+.how-to-play-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 5% 5%;
+    text-align: center;
+}
+
+.instructions {
+    max-width: 80%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    font-size: 18px;
+    line-height: 1.5;
+}
+
 .level-selector-btn {
     padding: var(--level-selector-btn-padding);
     font-size: var(--level-selector-btn-font-size);

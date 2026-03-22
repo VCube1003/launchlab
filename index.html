@@ -37,9 +37,9 @@
         <div class="controls">
             <div id="angleControl">
                 <label>Angle:</label>
-                <input type="range" id="angleSlider" min="0" max="90" value="0">
+                <input type="range" id="angleSlider" min="-90" max="90" value="0">
                 <span id="angleValue">0</span>
-                <input type="number" id="angleInput" min="0" max="90" value="0" style="width: 70px; margin-left: 8px;">
+                <input type="number" id="angleInput" min="-90" max="90" value="0" style="width: 70px; margin-left: 8px;">
             </div>
 
             <div id="velocityControl">
@@ -76,6 +76,18 @@
             <p id="simTime">Time: -</p>
         </div>
 
+    </div>
+
+    <div class="how-to-play-screen" id="howToPlayScreen">
+        <h1>HOW TO PLAY</h1>
+        <br>
+        <div class="instructions">
+            Welcome to LaunchLab - a game based on simulating projectile motion!<br><br>
+            To play a level, select "Play" and click on any of the levels to begin playing them.<br><br>
+            Each level involves being able to control one variable such that the projectile lands in the intended target. You may use either the slider or the text box to set the value. After that, click on launch to see a simulation of this motion!<br><br>
+            To save your progress once you're done, click on "Save Code" and copy the text given and save it somewhere. To load your progress after coming back, click on "Load Save" and paste in this code!<br><br>
+        </div>
+        <button class="return" onclick="mainMenu()">Back</button>
     </div>
 
     <div id="saveModal" class="modal">

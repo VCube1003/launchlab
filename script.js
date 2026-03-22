@@ -1,6 +1,7 @@
 const menu = document.getElementById("menu");
 const levelsScreen = document.getElementById("levels");
 const gameScreen = document.getElementById("gameScreen");
+const howToPlayScreen = document.getElementById("howToPlayScreen");
 
 const angleControl = document.getElementById("angleControl");
 const velocityControl = document.getElementById("velocityControl");
@@ -8,6 +9,7 @@ const heightControl = document.getElementById("heightControl");
 
 levelsScreen.classList.add("hidden");
 gameScreen.classList.add("hidden");
+howToPlayScreen.classList.add("hidden");
 saveModal.classList.add("hidden");
 loadModal.classList.add("hidden");
 angleControl.classList.add("hidden");
@@ -35,7 +37,7 @@ const levelConfigs = [{
     initialHeight: 0,
     initialVelocity: 25,
     adjustableParameter: "angle",
-    constraintRange: [0, 90]
+    constraintRange: [-90, 90]
 }, {
     targetPosition: [100, 0],
     initialHeight: 30,
@@ -44,34 +46,52 @@ const levelConfigs = [{
     constraintRange: [0, 100]
 }, 
 {
-    targetPosition: [100, 0],
-    initialVelocity: 50,
-    launchAngle: 0,
+    targetPosition: [75, 0],
+    initialVelocity: 22,
+    launchAngle: 30,
     adjustableParameter: "height",
     constraintRange: [0, 50]
 }, 
 {
-    targetPosition: [100, 0],
-    initialVelocity: 50,
-    launchAngle: 0,
-    adjustableParameter: "height",
-    constraintRange: [0, 50]
+    targetPosition: [50, 0],
+    initialHeight: 50,
+    initialVelocity: 20,
+    adjustableParameter: "angle",
+    constraintRange: [-90, 90]
+}, 
+{
+    targetPosition: [20, 0],
+    initialHeight: 50,
+    launchAngle: -45,
+    adjustableParameter: "velocity",
+    constraintRange: [0, 100]
 }, 
 {
     targetPosition: [100, 0],
+    initialHeight: 25,
     initialVelocity: 50,
-    launchAngle: 0,
-    adjustableParameter: "height",
-    constraintRange: [0, 50]
-}, 
-{
-    targetPosition: [100, 0],
-    initialVelocity: 50,
-    launchAngle: 0,
-    adjustableParameter: "height",
-    constraintRange: [0, 50]
+    adjustableParameter: "angle",
+    constraintRange: [-90, 90]
 }
 ];
+
+function formatTime(seconds) {
+    if (seconds === null) {
+        return "Best time: Not completed";
+    }
+    let minutes = Math.floor(seconds / 60);
+    let secs = seconds % 60;
+    let secStr = secs.toFixed(3).padStart(6, '0');
+    return `Best time: ${minutes}:${secStr}`;
+}
+
+function updateLevelButtons() {
+    for (let i = 0; i < numLevels; i++) {
+        let btn = document.getElementById(`l${i+1}`);
+        let timeStr = formatTime(bestTimes[i]);
+        btn.innerHTML = `Level ${i+1}<br><i style="font-size: smaller;">${timeStr}</i>`;
+    }
+}
 
 function saveCodeTimeValidation(time){
     return /^\d+(\.\d{1,3})?$/.test(time);
@@ -134,7 +154,8 @@ function closeSave() {
 
 function startGame() {
     menu.classList.add("hidden");
-    levelsScreen.classList.remove("hidden"); 
+    levelsScreen.classList.remove("hidden");
+    updateLevelButtons();
 }
 
 function saveGame() {
@@ -159,6 +180,7 @@ function confirmLoad() {
     if (decode(code)) {
         alert("Save loaded successfully!");
         closeLoad();
+        updateLevelButtons();
     } else {
         alert("Invalid save code.");
     }
@@ -169,13 +191,15 @@ function closeLoad() {
 }
 
 function howToPlay(){
-    alert("How to Play");
+    menu.classList.add("hidden");
+    howToPlayScreen.classList.remove("hidden");
 }
 
 function mainMenu(){
     menu.classList.remove("hidden");
     levelsScreen.classList.add("hidden"); 
     gameScreen.classList.add("hidden");
+    howToPlayScreen.classList.add("hidden");
 }
 
 function level(num) {
@@ -191,6 +215,7 @@ function backToLevels(){
     isSimulating = false;
     levelsScreen.classList.remove("hidden");
     gameScreen.classList.add("hidden");
+    updateLevelButtons();
 }
 
 let currentLevel = 0;
@@ -367,7 +392,7 @@ function applyLevelValues() {
         activeInput = heightInput;
     }
 
-    const [minConstraint, maxConstraint] = levelData.constraintRange || [0, 100];
+    const [minConstraint, maxConstraint] = levelData.constraintRange;
     activeSlider.min = minConstraint;
     activeSlider.max = maxConstraint;
     const defaultValue = Math.round((minConstraint + maxConstraint) / 2);
@@ -523,9 +548,9 @@ function physicsSimulation() {
             isSimulating = false;
 
             if (Math.hypot(pos[0] - goal[0], pos[1] - goal[1]) < 5) {
-                let finalTime = (stopTimer() / 1000).toFixed(3);
+                let finalTime = stopTimer() / 1000;
 
-                alert(`Level ${currentLevel + 1} Complete! Time: ${finalTime}s`);
+                alert(`Level ${currentLevel + 1} Complete! Time: ${finalTime.toFixed(3)}s`);
 
                 if ((!levelCompletions[currentLevel]) || (finalTime < bestTimes[currentLevel])) {
                     levelCompletions[currentLevel] = true;
