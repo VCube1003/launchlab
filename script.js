@@ -187,6 +187,8 @@ function level(num) {
 }
 
 function backToLevels(){
+    simRunning = false;
+    isSimulating = false;
     levelsScreen.classList.remove("hidden");
     gameScreen.classList.add("hidden");
 }
@@ -383,7 +385,7 @@ function applyLevelValues() {
     
     // Draw static canvas elements
     const goal = levelData.targetPosition;
-    updateDisplay([0, levelData.initialHeight || 0], [0,0], 0, goal);
+    updateDisplay([0, levelData.initialHeight || 0], [0,0], 0, goal, []);
 }
 
 angleSlider.addEventListener("input", () => updateDisplayFromSlider(angleSlider, angleValue, angleInput));
@@ -432,7 +434,7 @@ document.addEventListener("DOMContentLoaded", () => {
 let simRunning = false;
 let isSimulating = false;
 
-function updateDisplay(p, v, t, goal){
+function updateDisplay(p, v, t, goal, trail){
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     const scale = 7;
@@ -443,6 +445,16 @@ function updateDisplay(p, v, t, goal){
     simTime.textContent = `Time: ${(t / 1000).toFixed(3)}s`;
 
     drawStaticScene(goal);
+
+    // Draw trail
+    ctx.fillStyle = "red";
+    for (let point of trail) {
+        const x = point[0] * scale;
+        const y = canvasHeight - point[1] * scale - 35;
+        ctx.beginPath();
+        ctx.arc(x, y, 2, 0, 2 * Math.PI);
+        ctx.fill();
+    }
 
     if (isSimulating) {
         const x = p[0] * scale;
@@ -483,6 +495,8 @@ function physicsSimulation() {
     const scale = 7; // pixels per unit
     const canvasHeight = 450;
 
+    let trail = [];
+
     function loop() {
         if (!simRunning) return;
 
@@ -491,6 +505,9 @@ function physicsSimulation() {
         t = now;
         elapsed += dt;
 
+        // Add current position to trail
+        trail.push([pos[0], pos[1]]);
+
         // physics update
         pos[0] += vel[0] * dt / 1000;
         pos[1] += vel[1] * dt / 1000;
@@ -498,7 +515,7 @@ function physicsSimulation() {
         vel[0] += accel[0] * dt / 1000;
         vel[1] += accel[1] * dt / 1000;
 
-        updateDisplay(pos, vel, elapsed, goal);
+        updateDisplay(pos, vel, elapsed, goal, trail);
 
         // ground hit
         if (pos[1] < 0) {
