@@ -23,7 +23,7 @@ const levelConfigs = [{
     initialVelocity: 25,
     launchAngle: 0,
     adjustableParameter: "height",
-    constraintRange: [0, 100]
+    constraintRange: [0, 50]
 }, {
     targetPosition: [30, 0],
     initialHeight: 0,
@@ -32,15 +32,15 @@ const levelConfigs = [{
     constraintRange: [0, 100]
 }, {
     targetPosition: [50, 0],
-    initialHeight: 20,
+    initialHeight: 0,
     initialVelocity: 25,
     adjustableParameter: "angle",
     constraintRange: [0, 90]
 }, {
     targetPosition: [100, 0],
-    initialVelocity: 50,
-    launchAngle: 0,
-    adjustableParameter: "height",
+    initialHeight: 30,
+    launchAngle: 45,
+    adjustableParameter: "velocity",
     constraintRange: [0, 100]
 }, 
 {
@@ -48,28 +48,28 @@ const levelConfigs = [{
     initialVelocity: 50,
     launchAngle: 0,
     adjustableParameter: "height",
-    constraintRange: [0, 100]
+    constraintRange: [0, 50]
 }, 
 {
     targetPosition: [100, 0],
     initialVelocity: 50,
     launchAngle: 0,
     adjustableParameter: "height",
-    constraintRange: [0, 100]
+    constraintRange: [0, 50]
 }, 
 {
     targetPosition: [100, 0],
     initialVelocity: 50,
     launchAngle: 0,
     adjustableParameter: "height",
-    constraintRange: [0, 100]
+    constraintRange: [0, 50]
 }, 
 {
     targetPosition: [100, 0],
     initialVelocity: 50,
     launchAngle: 0,
     adjustableParameter: "height",
-    constraintRange: [0, 100]
+    constraintRange: [0, 50]
 }
 ];
 
@@ -319,6 +319,14 @@ function applyLevelValues() {
     controlsInfo.classList.remove("hidden");
     simulationInfo.classList.add("hidden");
     updateControlsInfo();
+    
+    // Draw static canvas elements
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const scale = 7;
+    const canvasHeight = 400;
+    const goal = levelData.targetPosition;
+    updateDisplay([0, levelData.initialHeight || 0], [0,0], 0, ctx, scale, canvasHeight, goal);
 }
 
 angleSlider.addEventListener("input", () => updateDisplayFromSlider(angleSlider, angleValue, angleInput));
@@ -347,14 +355,48 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 let simRunning = false;
+let isSimulating = false;
 
-function updateDisplay(p, v, t){
+function updateDisplay(p, v, t, ctx, scale, canvasHeight, goal){
     const canvasWidth = 800;
-    const scale = canvasWidth / 100;
     
     simPosition.textContent = `Position: (${p[0].toFixed(2)}, ${p[1].toFixed(2)})`;
     simVelocity.textContent = `Velocity: (${v[0].toFixed(2)}, ${v[1].toFixed(2)})`;
     simTime.textContent = `Time: ${(t / 1000).toFixed(3)}s`;
+
+    // Draw on canvas
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    
+    // Draw ground
+    ctx.fillStyle = "lightgreen";
+    ctx.fillRect(0, canvasHeight - 35, canvasWidth, 35);
+    
+    // Draw cannon
+    const cannonHeight = Number(heightSlider.value) * scale + 35;
+    ctx.fillStyle = "gray";
+    ctx.fillRect(0, canvasHeight - cannonHeight - 15, 20, 15);
+    
+    // Draw flag at target
+    const flagX = goal[0] * scale;
+    const flagY = canvasHeight - goal[1] * scale - 35;
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(flagX, flagY);
+    ctx.lineTo(flagX, flagY - 30);
+    ctx.stroke();
+    ctx.fillStyle = "red";
+    ctx.fillRect(flagX, flagY - 30, 15, 10);
+    
+    // Draw projectile if simulating
+    if (isSimulating) {
+        const x = p[0] * scale;
+        const y = canvasHeight - p[1] * scale - 42.5;
+        ctx.beginPath();
+        ctx.arc(x, y, 7.5, 0, 2 * Math.PI);
+        ctx.fillStyle = "red";
+        ctx.fill();
+    }
 }
 
 function updateButtonColor(levelNum){
@@ -376,9 +418,15 @@ function physicsSimulation() {
     const goal = levelConfigs[currentLevel].targetPosition;
 
     simRunning = true;
+    isSimulating = true;
 
     controlsInfo.classList.add("hidden");
     simulationInfo.classList.remove("hidden");
+
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const scale = 7; // pixels per unit
+    const canvasHeight = 400;
 
     function loop() {
         if (!simRunning) return;
@@ -395,11 +443,12 @@ function physicsSimulation() {
         vel[0] += accel[0] * dt / 1000;
         vel[1] += accel[1] * dt / 1000;
 
-        updateDisplay(pos, vel, elapsed);
+        updateDisplay(pos, vel, elapsed, ctx, scale, canvasHeight, goal);
 
         // ground hit
         if (pos[1] < 0) {
             simRunning = false;
+            isSimulating = false;
 
             if (Math.hypot(pos[0] - goal[0], pos[1] - goal[1]) < 5) {
                 let finalTime = (stopTimer() / 1000).toFixed(3);
@@ -437,6 +486,7 @@ function physicsSimulation() {
 
 function launchProjectile(){
     pauseTimer();
+    isSimulating = true;
     const adjustableParam = levelConfigs[currentLevel].adjustableParameter;
     if (adjustableParam === "angle") {
         angleControl.classList.add("hidden");

@@ -82,6 +82,10 @@ body {
     text-align: center;   /* Keeps your title centered */
 }
 
+.game-screen {
+    background-color: skyblue;
+}
+
 .level-selector-btn {
     padding: var(--level-selector-btn-padding);
     font-size: var(--level-selector-btn-font-size);
