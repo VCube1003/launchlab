@@ -63,10 +63,10 @@ body {
 .level-selector-buttons {
     display: grid;
 
-    /* Create 4 columns that take up equal space (1 fraction each) */
+    /* Creates 4 columns that take up equal space (1 fraction each) */
     grid-template-columns: repeat(4, 1fr); 
     
-    /* Create 2 rows with a specific height (or use 'auto') */
+    /* Creates 2 rows with a specific height */
     grid-template-rows: repeat(2, 100px);
     
     /* The gaps between the buttons */
@@ -78,8 +78,8 @@ body {
 }
 
 .level-selector-screen h1{
-    margin-bottom: 40px;  /* Adjust this number to increase/decrease the gap */
-    text-align: center;   /* Keeps your title centered */
+    margin-bottom: 40px; 
+    text-align: center;
 }
 
 .game-screen {

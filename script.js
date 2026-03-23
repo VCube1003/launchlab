@@ -61,7 +61,7 @@ const levelConfigs = [{
     launchAngle: 0,
     adjustableParameter: "height",
     constraintRange: [0, 50],
-    randomizationFactors: { initialVelocity: 10, targetX: 20 }
+    randomizationFactors: { initialVelocity: 5, targetX: 10 }
 }, {
     targetPosition: [30, 0],
     initialHeight: 0,
@@ -134,7 +134,7 @@ function formatTime(seconds) {
     return `Best time: ${minutes}:${secStr}`;
 }
 
-// update color and best times of level buttons
+// add best time to buttons after completion
 
 function updateLevelButtons() {
     for (let i = 0; i < numLevels; i++) {
