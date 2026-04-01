@@ -61,7 +61,7 @@ const levelConfigs = [{
     launchAngle: 0,
     adjustableParameter: "height",
     constraintRange: [0, 50],
-    randomizationFactors: { initialVelocity: 5, targetX: 10 }
+    randomizationFactors: { initialVelocity: 5, targetX: 10 } 
 }, {
     targetPosition: [30, 0],
     initialHeight: 0,
@@ -141,6 +141,13 @@ function updateLevelButtons() {
         let btn = document.getElementById(`l${i+1}`);
         let timeStr = formatTime(bestTimes[i]);
         btn.innerHTML = `Level ${i+1}<br><i style="font-size: smaller;">${timeStr}</i>`;
+        
+        // Update button color based on completion status
+        if (levelCompletions[i]) {
+            btn.style.backgroundColor = "#c1ff72";
+        } else {
+            btn.style.backgroundColor = "#ff5757";
+        }
     }
 }
 
@@ -183,6 +190,16 @@ function decode(code){
     for (i = 1; i < parts.length; i++){
         if (!saveCodeTimeValidation(parts[i]) && !(parts[i] === "null")) {
             return false;
+        }
+    }
+
+    // Check for consistency between level completion and best time
+    for (i = 0; i < numLevels; i++){
+        if (parts[0][i] === "1" && parts[i+1] === "null") {
+            return false; // Level marked complete but has no best time
+        }
+        if (parts[0][i] === "0" && parts[i+1] !== "null") {
+            return false; // Level marked incomplete but has a best time
         }
     }
 
